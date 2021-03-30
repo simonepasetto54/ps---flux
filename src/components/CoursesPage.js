@@ -1,16 +1,23 @@
 import React, { useState, useEffect } from "react";
-import { getCourses } from "../api/courseApi";
 import CourseList from './CourseList';
+import courseStore from '../stores/courseStore';
 import { Link } from "react-router-dom";
+import { loadCourses } from "../actions/courseActions";
 
-function CoursesPage(props) {
-  const [courses, setCourses] = useState([]);
+
+function CoursesPage() {
+  const [courses, setCourses] = useState(courseStore.getCourses());
 
 
   useEffect(() => {
-    getCourses().then(_courses => setCourses(_courses));
+    courseStore.addChangeListener(onChange); //qui ci stiamo iscrivendo allo store 
+    courseStore.getCourses().length === 0 && loadCourses();
+    return () => courseStore.removeChangeListener(onChange); //pulisce quando ci spostiamo su un altra pagina
   }, []);
 
+  const onChange = () => {
+    setCourses(courseStore.getCourses());    
+  }
   return (
     <>
       <h2>Courses</h2>

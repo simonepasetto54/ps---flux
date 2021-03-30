@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import CourseForm from "./CourseForm";
-import * as courseApi from '../api/courseApi';
 import { toast } from 'react-toastify';
+import courseStore from '../stores/courseStore';
+import * as courseActions from '../actions/courseActions';
 
 
 const ManageCoursePage = props => {
     const [errors, setErrors] = useState({});
+    const [courses, setCourses] = useState(courseStore.getCourses());
     const [course, setCourse] = useState({
         id: null,
         slug: "",
@@ -15,9 +17,20 @@ const ManageCoursePage = props => {
     });
 
     useEffect(() => {
-        const slug = props.match.params.slug
-        if(slug) courseApi.getCourseBySlug(slug).then(_course => setCourse(_course))
-    },[props.match.params.slug])
+        courseStore.addChangeListener(onChange); //qui ci stiamo iscrivendo allo store
+        const slug = props.match.params.slug;
+        if (courses.length === 0) {
+            courseActions.loadCourses();
+        } else if (slug) {
+            setCourse(courseStore.getCourseBySlug(slug));
+        }
+        return () => courseStore.removeChangeListener(onChange); //pulisce quando ci spostiamo su un altra pagina
+
+    }, [courses.length, props.match.params.slug])
+
+    const onChange = () => {
+        setCourses(courseStore.getCourses());
+    }
 
     const handleChange = ({ target }) => { //questa sotto tra [] non è un array ma una computed property
         //la convenzione vuole che nei form si utilizzi l'attributo name per indicare la proprietà da andare a modificare (title, authorID, ecc)
@@ -26,8 +39,8 @@ const ManageCoursePage = props => {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        if(!formIsValid()) return;
-        courseApi.saveCourse(course).then(() => {
+        if (!formIsValid()) return;
+        courseActions.saveCourse(course).then(() => {
             props.history.push("/courses");
             toast.success('Course saved.')
         })
@@ -46,7 +59,7 @@ const ManageCoursePage = props => {
         <>
             <h2>Manager Course</h2>
             {props.match.params.slug}
-            <CourseForm course={course} onChange={handleChange} onSubmit={handleSubmit} errors={errors}/>
+            <CourseForm course={course} onChange={handleChange} onSubmit={handleSubmit} errors={errors} />
         </>
     );
 }
