@@ -10,7 +10,7 @@ function CourseForm(props) {
       <TextInput id="title" name="title" onChange={props.onChange} value={props.course.title} label="Title" error={props.errors.title}/>
 
       <div className="form-group">
-        <label htmlFor="author">Authr</label>
+        <label htmlFor="author">Authoraaaaaa</label>
         <div className="field">
           <select id="author" name="authorId" onChange={props.onChange} value={props.course.authorId || ''} className="form-control"  error={props.errors.authorId}>
             <option value="" />
